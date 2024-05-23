@@ -11,7 +11,9 @@ import br.com.johabfreitas.recuperarimagensimgur.databinding.ActivityMainBinding
 import br.com.johabfreitas.recuperarimagensimgur.model.ImagensRespostas
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
@@ -20,9 +22,11 @@ class MainActivity : AppCompatActivity() {
         ActivityMainBinding.inflate(layoutInflater)
     }
 
-    private val retrofit by lazy {
-        RetrofitHelper.retrofit
+    private val imgurAPI by lazy {
+        RetrofitHelper.imgurAPI
     }
+
+    private var job: Job? = null
 
     private lateinit var galeriaAdapter: GaleriaAdapter
 
@@ -31,50 +35,59 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         galeriaAdapter = GaleriaAdapter()
-        galeriaAdapter.adicionarImagens(
-            listOf("https://img.freepik.com/fotos-gratis/gatos-bonitos-relaxando-dentro-de-casa_23-2150692683.jpg",
-                "https://img.freepik.com/fotos-gratis/gatos-bonitos-relaxando-dentro-de-casa_23-2150692683.jpg",
-                "https://img.freepik.com/fotos-gratis/gatos-bonitos-relaxando-dentro-de-casa_23-2150692683.jpg",
-                "https://img.freepik.com/fotos-gratis/gatos-bonitos-relaxando-dentro-de-casa_23-2150692683.jpg")
-        )
         binding.rvGaleria.adapter = galeriaAdapter
         binding.rvGaleria.layoutManager = GridLayoutManager(this, 3, RecyclerView.VERTICAL, false)
 
 
     }
 
+    override fun onStart() {
+        super.onStart()
+        recuperarImagensAPI()
+    }
 
-    private suspend fun recuperarImagem() {
+    override fun onDestroy() {
+        super.onDestroy()
+        job?.cancel()
+    }
 
-        var retorno: Response<ImagensRespostas>? = null
+    fun recuperarImagensAPI(){
 
-        try{
-            val chamadaAPI = retrofit.recuperarImagens("cats")
-            retorno = chamadaAPI
+        job = CoroutineScope(Dispatchers.IO).launch {
+            var response: Response<ImagensRespostas>? = null
 
-        }catch (e: Exception) {
-            e.printStackTrace()
-            Log.i("info_imgur", "Erro CODE:")
-        }
+            try{
+                response = imgurAPI.recuperarImagensGaleria("cats")
 
-        if(retorno != null) {
+            }catch(e: Exception){
+                e.printStackTrace()
+            }
 
-            if(retorno.isSuccessful){
+            if(response != null && response.isSuccessful){
 
-                val listaImage = retorno.body()
-                val listaImagens = listaImage?.listaImagens
+                var resultado = response.body()
+                if(resultado != null){
 
-                var resultado = ""
-                listaImagens?.forEach{imagens ->
-                    val image = imagens.link
-                    val listaResultado = "Imagem: $image"
+                    var listaDados = resultado.data
 
-                    resultado += listaResultado
-                    Log.i("info_imgur", "$resultado")
+                    var listaUrlImagens = mutableListOf<String>()
+
+                    listaDados.forEach{dados ->
+                        val imagem = dados.images[0]
+                        val tipo = imagem.type
+                        if(tipo == "image/jpeg"){
+                            listaUrlImagens.add(imagem.link)
+                        }
+                    }
+
+                    withContext(Dispatchers.Main){
+                        galeriaAdapter.adicionarImagens(listaUrlImagens)
+                    }
+
                 }
 
             } else {
-                Log.i("info_imgur", "${retorno.code()}")
+                Log.i("info_imgur", "Erro ao recuperar CODE: ${response?.code()} ")
             }
         }
     }

@@ -1,5 +1,6 @@
 package br.com.johabfreitas.recuperarimagensimgur.adapter
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView.Adapter
@@ -12,7 +13,7 @@ class GaleriaAdapter : Adapter<GaleriaAdapter.GaleriaViewHolder>() {
 
     private var listaImagens = emptyList<String>()
     fun adicionarImagens(lista : List<String>){
-        listaImagens  = lista
+        this.listaImagens  = lista
         notifyDataSetChanged()
     }
     inner class GaleriaViewHolder(val binding: ItemGaleriaBinding) : ViewHolder(binding.root){

@@ -14,7 +14,7 @@ data class Tag(
     val logo_destination_url: Any,
     val logo_hash: Any,
     val name: String,
-    val thumbnail_hash: Any,
+    val thumbnail_hash: String,
     val thumbnail_is_animated: Boolean,
     val total_items: Int
 )

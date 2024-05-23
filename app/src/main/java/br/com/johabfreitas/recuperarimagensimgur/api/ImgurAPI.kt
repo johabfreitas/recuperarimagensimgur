@@ -5,10 +5,9 @@ import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-interface ImagesAPI {
+interface ImgurAPI {
 
-
-    @GET("/")
-    suspend fun recuperarImagens(@Query("string") string: String ) : Response<ImagensRespostas>
+    @GET("gallery/search/")
+    suspend fun recuperarImagensGaleria(@Query("q") q: String ) : Response<ImagensRespostas>
 
 }
