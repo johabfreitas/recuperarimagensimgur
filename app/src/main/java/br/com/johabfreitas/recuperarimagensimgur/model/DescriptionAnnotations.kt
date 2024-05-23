@@ -1,0 +1,3 @@
+package br.com.johabfreitas.recuperarimagensimgur.model
+
+class DescriptionAnnotations

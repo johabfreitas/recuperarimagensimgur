@@ -1,6 +1,6 @@
 package br.com.johabfreitas.recuperarimagensimgur.model
 
-data class Images(
+data class ListaImagens(
     val account_id: Any,
     val account_url: Any,
     val ad_type: Int,

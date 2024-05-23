@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "br.com.johabfreitas.recuperarimagensimgur"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "br.com.johabfreitas.recuperarimagensimgur"
